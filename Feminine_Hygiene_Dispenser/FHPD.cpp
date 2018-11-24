@@ -68,6 +68,7 @@ void FHPD::dispPad()
     stepper.rotate(PAD_ANGLE_NEEDED-PAD_OVERSTEP);    // reverse revolution
     stepper.rotate(PAD_OVERSTEP);
     digitalWrite(ENABLE_PIN, HIGH); // Disable DRV8825 and Stepper
+    Serial.println("Dispensed Pad");
   }  
 
 void FHPD::dispTampon()
