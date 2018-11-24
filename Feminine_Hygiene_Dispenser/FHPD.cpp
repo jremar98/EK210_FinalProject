@@ -59,14 +59,17 @@ void FHPD::initialize()
       #else
       Serial.println("Warning, Low Tampon LED pin Not Defined!");
       #endif
+
+    Serial.println("Initialization Complete");
+    
 }
 
 void FHPD::dispPad() 
 {
     stepper.setMicrostep(MICROSTEPPING);   // Set microstep mode to defined 
     digitalWrite(ENABLE_PIN, LOW); // Enable DRV8825 and Stepper
-    stepper.rotate(PAD_ANGLE_NEEDED-PAD_OVERSTEP);    // reverse revolution
-    stepper.rotate(PAD_OVERSTEP);
+    stepper.rotate(-PAD_ANGLE_NEEDED-PAD_OVERSTEP);    // reverse revolution
+    stepper.rotate(PAD_OVERSTEP); //Rotate stepper to angle needed (and remove offset)
     digitalWrite(ENABLE_PIN, HIGH); // Disable DRV8825 and Stepper
     Serial.println("Dispensed Pad");
   }  
