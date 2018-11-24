@@ -1,3 +1,0 @@
-FHPD	KEYWORD1
-initialize	KEYWORD2
-dispPad		KEYWORD2
