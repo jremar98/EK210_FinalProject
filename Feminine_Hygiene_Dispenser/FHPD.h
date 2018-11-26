@@ -15,7 +15,7 @@ class FHPD
   void dispPad(); //Dispense Pad
   void dispTampon(); //Dispense Tampon
   bool buttonPressCheck();//Determine whether button has been pressed
-  void runDebug(); //Debug to run stepper without trigger
+  void runStepperDebug(); //Debug to run stepper without trigger
   
 
   private:

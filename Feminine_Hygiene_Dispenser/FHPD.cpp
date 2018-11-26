@@ -82,10 +82,10 @@ void FHPD::dispTampon()
 bool FHPD::buttonPressCheck()
 {
   
-  int buttonState = digitalRead(PADBUTTON_PIN);
-  if(buttonState == HIGH)
+  int buttonState = digitalRead(PADBUTTON_PIN); //Check for button press
+  if(buttonState == HIGH) //If Button pressed
   {
-    return 1;
+    return 1; 
   }
   else 
   {
@@ -94,14 +94,13 @@ bool FHPD::buttonPressCheck()
   
 }
 
-void FHPD::runDebug()
+void FHPD::runStepperDebug() //Run for debugging of stepper motor by bypassing controls
 {
 
     digitalWrite(ENABLE_PIN, LOW); // Disable DRV8825 and Stepper
     Serial.println("Microstepping set to 1:8");
     stepper.setMicrostep(MICROSTEPPING);   // Set microstep mode to 1:8
     delay(1000);
-
 
     Serial.println("Rotating stepper CCW");
     Serial.println("Turning on Motor");

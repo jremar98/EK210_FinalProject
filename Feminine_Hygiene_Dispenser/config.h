@@ -1,10 +1,16 @@
+/*config.h file for Feminine hygiene product dispenser
+ * Change definintions here to configure software
+ * 
+ * Written by Jordan Remar, November 23,2018
+ * 
+ */
+
 
 ///////////////////////////////////////////////////////////
 //--------------------User Parameters--------------------//
 ///////////////////////////////////////////////////////////
 
-
-#define BUTTON_DEBOUNCE 500 //Delay for minimum time between card swipes (to avoid accidentally swiping to quickly)
+#define BUTTON_DEBOUNCE 500 //Debounce time for buttons to prevent button bounce 
 
 
 ///////////////////////////////////////////////////////////
@@ -20,7 +26,9 @@
 //////////////////////////////////////////////////////////////
 #define PAD_ANGLE_NEEDED -120 // Angle needed for stepper to dispense 1 pad 
 #define PAD_OVERSTEP 45//Angle overstep for pad dispense, used for clean dispensing
-#define TAMPON_ANGLE_NEEDED 0 //Angle needed for stepper to dispense 1 tampon
+#define TAMPON_ANGLE_NEEDED 0 //Angle needed for stepper to dispense 1 tampon (Still undetermined)
+
+
 
 
 
