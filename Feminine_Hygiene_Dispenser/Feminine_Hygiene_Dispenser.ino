@@ -1,7 +1,7 @@
 /*
 Written by Jordan Remar
 */
-#include <SPI.h> //SPI
+//#include <SPI.h> //SPI
 #include <SoftwareSerial.h> //Include library for card reader serial communication
 
 /*Include Local Header Files*/
@@ -32,6 +32,7 @@ void setup()
 {
   #ifdef PADBUTTON_PIN
       pinMode(PADBUTTON_PIN,INPUT); //declare button pin as input
+      Serial.println("Start");
       #else
       //Serial.println("Warning, Pad Dispense Button Not defined!");
       #endif
@@ -72,7 +73,7 @@ void setup()
   Serial.begin(9600);   // Initiate a serial communication
   Serial.println("Feminine Hygiene Product Dispenser Initialized!");
   cardSerial.begin(9600);
-  cardSerial.println("Serial Card Reader Initialized");
+  Serial.println("Serial Card Reader Initialized");
 
   //dispenser.initialize(); //run init function for dispenser 
   
