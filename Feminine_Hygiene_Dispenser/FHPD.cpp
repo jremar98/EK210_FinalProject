@@ -9,7 +9,9 @@
  #include "config.h"
  #include "pins.h"
 
-DRV8825 stepper(MOTOR_STEPS, DIR_PIN, STEP_PIN, ENABLE_PIN, M0_PIN, M1_PIN, M2_PIN); //Initiallize DRV8825/NEMA17
+//Call format for DRV8825 Stepper Library (from LaurB9): DRV8825(short steps, short dir_pin, short step_pin, short mode0_pin, short mode1_pin, short mode2_pin);
+
+DRV8825 stepper(MOTOR_STEPS, DIR_PIN, STEP_PIN, M0_PIN, M1_PIN, M2_PIN); //Initiallize DRV8825/NEMA17's (differentiating with enable pins, everything else is in parallel
 
  
 FHPD::FHPD()
@@ -22,70 +24,60 @@ void FHPD::initialize()
     
     stepper.begin(RPM); //Begin stepper
     stepper.enable(); //Turn On stepper
-    digitalWrite(ENABLE_PIN,HIGH); // Disable DRV8825 and Stepper 
+    digitalWrite(TAMPON_STEPPER_EN_PIN, HIGH); // Disable tampon DRV8825 and Stepper
+    digitalWrite(PAD_STEPPER_EN_PIN, HIGH); // Disable Pad DRV8825 and Stepper
 
     
     /*--------------set pinmodes-----------------*/
-    #ifdef PADBUTTON_PIN
-      pinMode(PADBUTTON_PIN,INPUT); //declare button pin as input
-      #else
-      Serial.println("Warning, Pad Dispense Button Not defined!");
-      #endif
-
-    #ifdef TAMPONBUTTON_PIN
-      pinMode(TAMPONBUTTON_PIN,OUTPUT);
-      #else
-      Serial.println("Warning, Tampon Dispense Button Not defined!");
-      #endif
-      
-    #ifdef BUZZER_PIN
-      pinMode(BUZZER_PIN, OUTPUT);
-      #endif
-
-    #ifdef LOWBAT_LED_PIN
-      pinMode(LOWBAT_LED_PIN,OUTPUT);
-      #else
-      Serial.println("Warning, Low Battery LED pin Not Defined!");
-      #endif
-      
-    #ifdef LOWPAD_LED_PIN
-      pinMode(LOWPAD_LED_PIN,OUTPUT);
-      #else
-      Serial.println("Warning, Low pad LED pin Not Defined!");
-      #endif
-
-    #ifdef LOWTAMPON_LED_PIN
-      pinMode(LOWTAMPON_LED_PIN,OUTPUT);
-      #else
-      Serial.println("Warning, Low Tampon LED pin Not Defined!");
-      #endif
-
-    Serial.println("Initialization Complete");
     
 }
 
 void FHPD::dispPad() 
 {
     stepper.setMicrostep(MICROSTEPPING);   // Set microstep mode to defined 
-    digitalWrite(ENABLE_PIN, LOW); // Enable DRV8825 and Stepper
-    stepper.rotate(-PAD_ANGLE_NEEDED-PAD_OVERSTEP);    // reverse revolution
-    stepper.rotate(PAD_OVERSTEP); //Rotate stepper to angle needed (and remove offset)
-    digitalWrite(ENABLE_PIN, HIGH); // Disable DRV8825 and Stepper
+    digitalWrite(TAMPON_STEPPER_EN_PIN, HIGH); // Disable tampon DRV8825 and Stepper
+    digitalWrite(PAD_STEPPER_EN_PIN, LOW); // Enable Pad DRV8825 and Stepper
+    
+    stepper.rotate(PAD_ANGLE_NEEDED-PAD_OVERSTEP);    // reverse revolution
+    delay(50);// let the dust settle
+    stepper.rotate(PAD_OVERSTEP);//Clear overstep
+    digitalWrite(PAD_STEPPER_EN_PIN, HIGH); // Disable DRV8825 and Stepper
     Serial.println("Dispensed Pad");
   }  
 
-void FHPD::dispTampon()
+void FHPD::dispTamponFrontCol() //Dispense tampon from front column
 {
-  //Place Holder for now...
+    stepper.setMicrostep(MICROSTEPPING);   // Set microstep mode to defined 
+    digitalWrite(PAD_STEPPER_EN_PIN, HIGH); // Disable tampon DRV8825 and Stepper
+    digitalWrite(TAMPON_STEPPER_EN_PIN, LOW); // Enable Pad DRV8825 and Stepper
+    
+    stepper.rotate(TAMPON_FRONT_ANGLE_NEEDED+TAMPON_OVERSTEP);    // dispense tampon 
+    stepper.rotate(-TAMPON_OVERSTEP); //Clear out overstep angle
+    digitalWrite(PAD_STEPPER_EN_PIN, HIGH); // Disable DRV8825 and Stepper
+    Serial.println("Dispensed Tampon from front column");
 }
 
-bool FHPD::buttonPressCheck()
+
+void FHPD::dispTamponBackCol()
+{
+    stepper.setMicrostep(MICROSTEPPING);   // Set microstep mode to defined 
+    digitalWrite(PAD_STEPPER_EN_PIN, HIGH); // Disable tampon DRV8825 and Stepper
+    digitalWrite(TAMPON_STEPPER_EN_PIN, LOW); // Enable Pad DRV8825 and Stepper
+    
+    stepper.rotate(TAMPON_BACK_ANGLE_NEEDED+TAMPON_OVERSTEP);    // dispense tampon 
+    delay(50);// let the dust settle
+    stepper.rotate(-TAMPON_OVERSTEP); //Clear out overstep angle
+    digitalWrite(PAD_STEPPER_EN_PIN, HIGH); // Disable DRV8825 and Stepper
+    Serial.println("Dispensed Tampon from back column");
+}
+
+bool FHPD::buttonPressCheck() //IRRELEVANT, DON'T USE
 {
   
-  int buttonState = digitalRead(PADBUTTON_PIN); //Check for button press
-  if(buttonState == HIGH) //If Button pressed
+  int buttonState = digitalRead(BUTTON_PIN);
+  if(buttonState == HIGH)
   {
-    return 1; 
+    return 1;
   }
   else 
   {
@@ -94,30 +86,32 @@ bool FHPD::buttonPressCheck()
   
 }
 
-void FHPD::runStepperDebug() //Run for debugging of stepper motor by bypassing controls
+void FHPD::runDebug()
 {
 
-    digitalWrite(ENABLE_PIN, LOW); // Disable DRV8825 and Stepper
+    digitalWrite(PAD_STEPPER_EN_PIN, HIGH); // Disable DRV8825 and Stepper
+    digitalWrite(TAMPON_STEPPER_EN_PIN, HIGH);
     Serial.println("Microstepping set to 1:8");
     stepper.setMicrostep(MICROSTEPPING);   // Set microstep mode to 1:8
     delay(1000);
 
-    Serial.println("Rotating stepper CCW");
+
+    Serial.println("Rotating Pad Stepper");
     Serial.println("Turning on Motor");
-    digitalWrite(ENABLE_PIN, LOW); // Enable DRV8825 and Stepper
+    digitalWrite(PAD_STEPPER_EN_PIN, LOW); // Enable DRV8825 and Stepper
     stepper.rotate(PAD_ANGLE_NEEDED);     // forward revolution
     Serial.println("Turning off Motor");
-    digitalWrite(ENABLE_PIN, HIGH); // Disable DRV8825 and Stepper
-
+    digitalWrite(PAD_STEPPER_EN_PIN, HIGH); // Disable DRV8825 and Stepper
+    
 
     delay(2000);
     Serial.println("Rotating stepper CW");
     Serial.println("Turning on Motor");
-    digitalWrite(ENABLE_PIN, LOW); // Enable DRV8825 and Stepper
+    digitalWrite(TAMPON_STEPPER_EN_PIN, LOW); // Enable DRV8825 and Stepper
     delay(1000);
-    stepper.rotate(PAD_ANGLE_NEEDED);    // reverse revolution
+    stepper.rotate(TAMPON_FRONT_ANGLE_NEEDED);    // reverse revolution
     Serial.println("Turning off Motor");
-    digitalWrite(ENABLE_PIN, HIGH); // Disable DRV8825 and Stepper
+    digitalWrite(TAMPON_STEPPER_EN_PIN, HIGH); // Disable DRV8825 and Stepper
     delay(2000);
 
 }

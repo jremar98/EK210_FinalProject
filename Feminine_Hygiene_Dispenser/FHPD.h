@@ -13,13 +13,15 @@ class FHPD
   public:
   FHPD(); //Class Constructor
   void dispPad(); //Dispense Pad
-  void dispTampon(); //Dispense Tampon
+  void dispTamponFrontCol(); //Dispense Tampon front column
+  void dispTamponBackCol(); //Dispense Tampon back column (prolly can clean this up to make one tampon dispense function with int argument for angle)
   bool buttonPressCheck();//Determine whether button has been pressed
-  void runStepperDebug(); //Debug to run stepper without trigger
-  
+  void runDebug(); //Debug to run stepper without trigger
+  void readCard(); //do this later, for now just throwing it in the void loop
+  void initialize(); //Initialize all hardware
 
   private:
-  void initialize(); //Initialize all hardware
+  
   
 }
 
