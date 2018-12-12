@@ -69,7 +69,6 @@
 
 /*Instances declarations*/
 SoftwareSerial cardSerial(CARD_READER_RX_PIN,CARD_READER_TX_PIN); // RX, TX
-DRV8825 stepper(MOTOR_STEPS, DIR_PIN, STEP_PIN, M0_PIN, M1_PIN, M2_PIN); //Initiallize DRV8825/NEMA17's (differentiating with enable pins, everything else is in parallel
 
 
 /*Global Variable Declarations*/
@@ -128,9 +127,7 @@ void setup()
       #endif
 
 
-    stepper.begin(RPM); //Begin stepper
     //stepper.enable(); //Turn On stepper
-    stepper.setMicrostep(MICROSTEPPING);
     digitalWrite(TAMPON_STEPPER_EN_PIN, HIGH); // Disable tampon DRV8825 and Stepper
     digitalWrite(PAD_STEPPER_EN_PIN, HIGH); // Disable Pad DRV8825 and Stepper
 
@@ -178,14 +175,7 @@ void loop()
         {
         Serial.print("Pad Button ADC = ");
         Serial.println(buttonState);
-        stepper.setMicrostep(MICROSTEPPING);   // Set microstep mode to defined 
-        digitalWrite(TAMPON_STEPPER_EN_PIN, HIGH); // Disable tampon DRV8825 and Stepper
-        digitalWrite(PAD_STEPPER_EN_PIN, LOW); // Enable Pad DRV8825 and Stepper
-        
-        stepper.rotate(-150);    // reverse revolution
-        stepper.rotate(+30);//Clear overstep
-        digitalWrite(PAD_STEPPER_EN_PIN, HIGH); // Disable DRV8825 and Stepper
-        Serial.println("Dispensed Pad");
+        dispPad() ;
         newData = false; //Clear card data 
         }
         if(analogRead(BUTTON_PIN)>=(TAMPON_ADC-100)&&analogRead(BUTTON_PIN)<(PAD_ADC-100))//TAMPON button pressed
@@ -283,7 +273,9 @@ void showNewData() {
 
 void dispPad() 
 {
-    //stepper.setMicrostep(MICROSTEPPING);   // Set microstep mode to defined 
+    DRV8825 stepper(MOTOR_STEPS, DIR_PIN, STEP_PIN, PAD_STEPPER_EN_PIN, M0_PIN, M1_PIN, M2_PIN); //Initiallize DRV8825/NEMA17's (differentiating with enable pins, everything else is in parallel
+    stepper.begin(RPM); //Begin stepper
+    stepper.setMicrostep(MICROSTEPPING);   // Set microstep mode to defined 
     digitalWrite(TAMPON_STEPPER_EN_PIN, HIGH); // Disable tampon DRV8825 and Stepper
     digitalWrite(PAD_STEPPER_EN_PIN, LOW); // Enable Pad DRV8825 and Stepper
     
@@ -295,6 +287,8 @@ void dispPad()
 
 void dispTamponFrontCol() //Dispense tampon from front column
 {
+    DRV8825 stepper(MOTOR_STEPS, DIR_PIN, STEP_PIN, TAMPON_STEPPER_EN_PIN, M0_PIN, M1_PIN, M2_PIN); //Initiallize DRV8825/NEMA17's (differentiating with enable pins, everything else is in parallel
+    stepper.begin(RPM); //Begin stepper
     stepper.setMicrostep(MICROSTEPPING);   // Set microstep mode to defined 
     digitalWrite(PAD_STEPPER_EN_PIN, HIGH); // Disable tampon DRV8825 and Stepper
     digitalWrite(TAMPON_STEPPER_EN_PIN, LOW); // Enable Pad DRV8825 and Stepper
@@ -308,10 +302,11 @@ void dispTamponFrontCol() //Dispense tampon from front column
 
 void dispTamponBackCol()
 {
+    DRV8825 stepper(MOTOR_STEPS, DIR_PIN, STEP_PIN, TAMPON_STEPPER_EN_PIN, M0_PIN, M1_PIN, M2_PIN); //Initiallize DRV8825/NEMA17's (differentiating with enable pins, everything else is in parallelc
+    stepper.begin(RPM); //Begin stepper
     stepper.setMicrostep(MICROSTEPPING);   // Set microstep mode to defined 
     digitalWrite(PAD_STEPPER_EN_PIN, HIGH); // Disable tampon DRV8825 and Stepper
     digitalWrite(TAMPON_STEPPER_EN_PIN, LOW); // Enable Pad DRV8825 and Stepper
-    
     stepper.rotate(TAMPON_BACK_ANGLE_NEEDED+TAMPON_OVERSTEP);    // dispense tampon 
     delay(50);// let the dust settle
     stepper.rotate(-TAMPON_OVERSTEP); //Clear out overstep angle
@@ -334,35 +329,7 @@ bool buttonPressCheck() //IRRELEVANT, DON'T USE
   
 }
 
-void runDebug()
-{
 
-    digitalWrite(PAD_STEPPER_EN_PIN, HIGH); // Disable DRV8825 and Stepper
-    digitalWrite(TAMPON_STEPPER_EN_PIN, HIGH);
-    Serial.println("Microstepping set to 1:8");
-    stepper.setMicrostep(MICROSTEPPING);   // Set microstep mode to 1:8
-    delay(1000);
-
-
-    Serial.println("Rotating Pad Stepper");
-    Serial.println("Turning on Motor");
-    digitalWrite(PAD_STEPPER_EN_PIN, LOW); // Enable DRV8825 and Stepper
-    stepper.rotate(PAD_ANGLE_NEEDED);     // forward revolution
-    Serial.println("Turning off Motor");
-    digitalWrite(PAD_STEPPER_EN_PIN, HIGH); // Disable DRV8825 and Stepper
-    
-
-    delay(2000);
-    Serial.println("Rotating stepper CW");
-    Serial.println("Turning on Motor");
-    digitalWrite(TAMPON_STEPPER_EN_PIN, LOW); // Enable DRV8825 and Stepper
-    delay(1000);
-    stepper.rotate(TAMPON_FRONT_ANGLE_NEEDED);    // reverse revolution
-    Serial.println("Turning off Motor");
-    digitalWrite(TAMPON_STEPPER_EN_PIN, HIGH); // Disable DRV8825 and Stepper
-    delay(2000);
-
-}
 
 boolean checkSwipeCount(){
      int n;
